@@ -1,5 +1,9 @@
 import logging
-from search_algorithms import bfs, level_order_search, is_passable_cell
+from search_algorithms import (
+    bfs, level_order_search, is_passable_cell,
+    greedy_search, lazy_greedy_search, optimized_bfs,
+    get_search_algorithm_for_difficulty
+)
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +77,12 @@ class Haduyi:
         # Use the selected search algorithm
         if self.search_algorithm == 'level_order':
             path = level_order_search(self.maze, self.pos, self.target_pos)
+        elif self.search_algorithm == 'greedy':
+            path = greedy_search(self.maze, self.pos, self.target_pos)
+        elif self.search_algorithm == 'lazy_greedy':
+            path = lazy_greedy_search(self.maze, self.pos, self.target_pos)
+        elif self.search_algorithm == 'optimized_bfs':
+            path = optimized_bfs(self.maze, self.pos, self.target_pos)
         else:  # Default to BFS
             path = bfs(self.maze, self.pos, self.target_pos)
         
@@ -146,6 +156,41 @@ class Haduyi:
     def is_at_target(self):
         """Check if Haduyi has reached the target."""
         return self.target_pos is not None and self.pos == self.target_pos
+
+
+def set_haduyi_difficulty(haduyi_list, difficulty):
+    """
+    Set difficulty for a list of Haduyi adversaries.
+    
+    This function can be called from main.py when UI team adds difficulty selection.
+    It updates all Haduyi in the list to use the appropriate search algorithm.
+    
+    Args:
+        haduyi_list: List of Haduyi objects
+        difficulty: String or int difficulty level ('easy', 'medium', 'hard', 'extreme' or 1-4)
+    
+    Example usage in main.py:
+        from ghosts import Haduyi, set_haduyi_difficulty
+        
+        # Create Haduyi list
+        haduyi_list = [Haduyi(maze, start_pos=(3, 2)), ...]
+        
+        # When UI changes difficulty (e.g., user selects "Hard")
+        set_haduyi_difficulty(haduyi_list, 'hard')
+    
+    Returns:
+        None (modifies Haduyi objects in place)
+    """
+    _, algo_name = get_search_algorithm_for_difficulty(difficulty)
+    
+    for haduyi in haduyi_list:
+        if hasattr(haduyi, 'search_algorithm'):
+            haduyi.search_algorithm = algo_name
+            # Recalculate path with new algorithm if target is set
+            if haduyi.target_pos:
+                haduyi._calculate_path()
+    
+    logger.info(f"Set difficulty '{difficulty}' for {len(haduyi_list)} Haduyi adversaries (algorithm: {algo_name})")
 
 
 # Alias for backward compatibility
