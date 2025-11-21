@@ -1,6 +1,7 @@
-from queue import Queue
+from queue import Queue, PriorityQueue
 import logging
 import random
+import heapq
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +282,206 @@ def optimized_bfs(maze, start, goal):
             visited.add((nr, nc))
     
     logger.warning(f"Optimized BFS: No path found from {start} to {goal}")
+    return None
+
+def dfs(maze, start, goal, max_depth=None):
+    """
+    Depth-First Search for pathfinding.
+    
+    Explores as deep as possible along each branch before backtracking.
+    Not guaranteed to find the shortest path, but useful for exploration.
+    
+    Args:
+        maze: Maze object with grid, rows, and cols attributes
+        start: Tuple (row, col) representing starting position
+        goal: Tuple (row, col) representing goal position
+        max_depth: Optional maximum depth to search (prevents infinite loops)
+    
+    Returns:
+        List of positions (path from start to goal) if path exists, None otherwise
+    """
+    if start == goal:
+        return [start]
+    
+    if max_depth is None:
+        max_depth = maze.rows * maze.cols
+    
+    visited = set()
+    stack = [(start, [start], 0)]  # (position, path, depth)
+    
+    while stack:
+        curr, path, depth = stack.pop()
+        
+        if curr == goal:
+            logger.debug(f"DFS found path from {start} to {goal} with {len(path)} steps")
+            return path
+        
+        if depth >= max_depth:
+            continue
+        
+        if curr in visited:
+            continue
+        
+        visited.add(curr)
+        r, c = curr
+        
+        # Explore neighbors (reversed to maintain left-right-down-up priority in stack)
+        neighbors = [(1, 0), (0, 1), (0, -1), (-1, 0)]  # down, right, left, up
+        for dr, dc in neighbors:
+            nr, nc = r + dr, c + dc
+            
+            if is_passable_cell(maze, nr, nc) and (nr, nc) not in visited:
+                stack.append(((nr, nc), path + [(nr, nc)], depth + 1))
+    
+    logger.warning(f"DFS: No path found from {start} to {goal}")
+    return None
+
+def manhattan_distance(pos1, pos2):
+    """Calculate Manhattan distance between two positions."""
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
+def astar(maze, start, goal, avoid_positions=None):
+    """
+    A* Search algorithm with heuristic guidance.
+    
+    Uses Manhattan distance as heuristic to find optimal path efficiently.
+    Can avoid specific positions (e.g., ghost locations).
+    
+    Args:
+        maze: Maze object with grid, rows, and cols attributes
+        start: Tuple (row, col) representing starting position
+        goal: Tuple (row, col) representing goal position
+        avoid_positions: Optional set of positions to avoid (e.g., ghost positions)
+    
+    Returns:
+        List of positions (path from start to goal) if path exists, None otherwise
+    """
+    if start == goal:
+        return [start]
+    
+    if avoid_positions is None:
+        avoid_positions = set()
+    
+    # Priority queue: (f_score, counter, position, path, g_score)
+    # f_score = g_score + h_score (total estimated cost)
+    # g_score = actual cost from start
+    # h_score = heuristic (Manhattan distance to goal)
+    counter = 0
+    pq = []
+    h_score = manhattan_distance(start, goal)
+    heapq.heappush(pq, (h_score, counter, start, [start], 0))
+    counter += 1
+    
+    visited = set()
+    
+    while pq:
+        f_score, _, curr, path, g_score = heapq.heappop(pq)
+        
+        if curr == goal:
+            logger.debug(f"A* found path from {start} to {goal} with {len(path)} steps")
+            return path
+        
+        if curr in visited:
+            continue
+        
+        visited.add(curr)
+        r, c = curr
+        
+        # Explore all neighbors
+        neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
+        for dr, dc in neighbors:
+            nr, nc = r + dr, c + dc
+            neighbor = (nr, nc)
+            
+            if neighbor in visited:
+                continue
+            
+            if not is_passable_cell(maze, nr, nc):
+                continue
+            
+            # Add penalty for positions we want to avoid (but don't make them impassable)
+            step_cost = 1
+            if neighbor in avoid_positions:
+                step_cost = 10  # High cost to discourage, but still allow if necessary
+            
+            new_g_score = g_score + step_cost
+            h_score = manhattan_distance(neighbor, goal)
+            new_f_score = new_g_score + h_score
+            
+            new_path = path + [neighbor]
+            heapq.heappush(pq, (new_f_score, counter, neighbor, new_path, new_g_score))
+            counter += 1
+    
+    logger.warning(f"A*: No path found from {start} to {goal}")
+    return None
+
+def uniform_cost_search(maze, start, goal, avoid_positions=None):
+    """
+    Uniform Cost Search (Dijkstra's algorithm for uniform costs).
+    
+    Finds optimal path by exploring lowest-cost nodes first.
+    All moves have cost 1 (uniform), but can add penalty for dangerous areas.
+    
+    Args:
+        maze: Maze object with grid, rows, and cols attributes
+        start: Tuple (row, col) representing starting position
+        goal: Tuple (row, col) representing goal position
+        avoid_positions: Optional set of positions to avoid with higher cost
+    
+    Returns:
+        List of positions (path from start to goal) if path exists, None otherwise
+    """
+    if start == goal:
+        return [start]
+    
+    if avoid_positions is None:
+        avoid_positions = set()
+    
+    # Priority queue: (cost, counter, position, path)
+    counter = 0
+    pq = []
+    heapq.heappush(pq, (0, counter, start, [start]))
+    counter += 1
+    
+    visited = {}  # position -> best cost so far
+    
+    while pq:
+        cost, _, curr, path = heapq.heappop(pq)
+        
+        if curr == goal:
+            logger.debug(f"UCS found path from {start} to {goal} with {len(path)} steps and cost {cost}")
+            return path
+        
+        # Skip if we've found a better path to this position
+        if curr in visited and visited[curr] <= cost:
+            continue
+        
+        visited[curr] = cost
+        r, c = curr
+        
+        # Explore all neighbors
+        neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
+        for dr, dc in neighbors:
+            nr, nc = r + dr, c + dc
+            neighbor = (nr, nc)
+            
+            if not is_passable_cell(maze, nr, nc):
+                continue
+            
+            # Add penalty for positions we want to avoid
+            step_cost = 1
+            if neighbor in avoid_positions:
+                step_cost = 8  # High cost to discourage dangerous moves
+            
+            new_cost = cost + step_cost
+            
+            # Only add if we haven't visited or found a better path
+            if neighbor not in visited or new_cost < visited[neighbor]:
+                new_path = path + [neighbor]
+                heapq.heappush(pq, (new_cost, counter, neighbor, new_path))
+                counter += 1
+    
+    logger.warning(f"UCS: No path found from {start} to {goal}")
     return None
 
 def get_search_algorithm_for_difficulty(difficulty):

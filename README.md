@@ -62,10 +62,11 @@ pip install -r requirements.txt
 
 ## How to Run
 
-1. Ensure you’re in the project root directory.
+1. Ensure you're in the project root directory.
 2. Launch the game:
    ```
    python src/main.py
+   python src/intelligent_main.py
    ```
 
 ---
