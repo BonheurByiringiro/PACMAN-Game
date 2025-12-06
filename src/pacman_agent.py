@@ -120,28 +120,25 @@ class PacmanAgent:
                 logger.info(f"Cannot change to {direction}: wall ahead. Keeping direction: {self.direction}")
     
     def move(self):
-        """Move Pacman in the current direction automatically."""
+        """Move Pacman in the current direction."""
         self.frame_count += 1
-        
-        # Only move every N frames to control speed
-        if self.frame_count % self.move_delay_frames != 0:
+        if self.frame_count < self.move_delay_frames:
             return
-        
-        r, c = self.pos
+
+        self.frame_count = 0
         dr, dc = self.direction_map[self.direction]
-        new_pos = (r + dr, c + dc)
-        
-        # Check if we can move in the current direction
-        if self.is_valid_move(new_pos[0], new_pos[1]):
+        nr, nc = self.pos[0] + dr, self.pos[1] + dc
+
+        if self.is_valid_move(nr, nc):
             self.prev_pos = self.pos
-            self.pos = new_pos
-            logger.info(f"Moved {self.direction} from {self.prev_pos} to {self.pos}")
+            self.pos = (nr, nc)
+            self.maze.collect_pellet(nr, nc)
             self.log_status()
         else:
             # Can't move in current direction (hit a wall)
             logger.warning(f"Cannot move {self.direction}: obstacle ahead at {self.pos}")
             # Try to find alternative valid moves
-            valid_neighbors = self.get_valid_neighbors(r, c)
+            valid_neighbors = self.get_valid_neighbors(self.pos[0], self.pos[1])
             if valid_neighbors:
                 logger.info(f"Available alternative moves: {valid_neighbors}")
             else:

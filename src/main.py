@@ -68,25 +68,30 @@ def draw_game_over(screen, font):
     restart_rect = restart_text.get_rect(center=(screen.get_width()//2, screen.get_height()//2 + 30))
     screen.blit(restart_text, restart_rect)
 
+def draw_win(screen, font):
+    """Draw win message and restart instructions."""
+    win_text = font.render("You Win! Press Enter to Restart", True, (0, 255, 0))
+    text_rect = win_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+    screen.blit(win_text, text_rect)
+
+def draw_score(screen, font, score):
+    """Draw the current score on the screen."""
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+
 def main():
+    # Initialize game state
+    game_state = "playing"
+
     pygame.init()
-    screen = pygame.display.set_mode((600, 700))
-    pygame.display.set_caption("Automated PACMAN AI - Use Arrow Keys or WASD to control")
-    
-    # Initialize font for game over message
-    pygame.font.init()
-    font = pygame.font.Font(None, 48)
-    
-    # Get the correct path to maze_layout.txt (works whether run from root or src/)
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    maze_file = os.path.join(script_dir, "maze_layout.txt")
-    maze = Maze(maze_file)
-    
-    # Initialize game objects
+    tile_size = 48  # Increased tile size for a larger maze and window
+    maze = Maze("maze_layout.txt")
+    screen_width = maze.cols * tile_size
+    screen_height = maze.rows * tile_size
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    font = pygame.font.Font(None, 36)
     pacman, haduyi_list = initialize_game(maze)
-    
-    # Game state
-    game_state = "playing"  # "playing" or "game_over"
+
     running = True
     clock = pygame.time.Clock()
 
@@ -108,6 +113,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
                 if game_state == "playing":
                     # Change direction when arrow keys or WASD are pressed
                     if event.key in key_to_direction:
@@ -118,7 +125,15 @@ def main():
                         # Reset game
                         pacman, haduyi_list = initialize_game(maze)
                         game_state = "playing"
+                elif game_state == "win":
+                    # Press Enter to restart after winning
+                    if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                        pacman, haduyi_list = initialize_game(maze)
+                        game_state = "playing"
         
+        if maze.get_remaining_pellets() == 0:
+            maze.regenerate_pellets()
+
         # Game logic only runs when playing
         if game_state == "playing":
             # Agent automatically continues in current direction
@@ -134,13 +149,21 @@ def main():
                 game_state = "game_over"
                 print("Game Over! Pacman was caught by Haduyi!")
         
+        # Check win condition
+        if maze.get_remaining_pellets() == 0:
+            game_state = "win"
+
         # Draw everything
+        screen.fill((0, 0, 0))  # Clear screen
         maze.draw(screen, pacman, haduyi_list)
-        
-        # Draw game over screen if game is over
+        draw_score(screen, font, maze.score)
+
+        # Draw game over or win screen if applicable
         if game_state == "game_over":
             draw_game_over(screen, font)
-        
+        elif game_state == "win":
+            draw_win(screen, font)
+
         pygame.display.flip()
         clock.tick(60)
 
