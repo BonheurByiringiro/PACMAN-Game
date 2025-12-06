@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Maze:
     def __init__(self, filename):
@@ -25,10 +26,17 @@ class Maze:
         return self._count_pellets()
     
     def collect_pellet(self, r, c):
-        """Collect pellet at position and update score."""
+        """Collect pellet at position and regenerate another pellet."""
         if self.grid[r][c] == 2:
             self.grid[r][c] = 0
             self.score += 10
+
+            # Regenerate a new pellet at a random empty position
+            empty_positions = [(row, col) for row in range(self.rows) for col in range(self.cols) if self.grid[row][col] == 0]
+            if empty_positions:
+                new_r, new_c = random.choice(empty_positions)
+                self.grid[new_r][new_c] = 2
+
             return True
         return False
     
@@ -40,6 +48,14 @@ class Maze:
                 self.grid.append([int(c) for c in line.strip().split()])
         self.initial_pellets = self._count_pellets()
         self.score = 0
+
+    def regenerate_pellets(self):
+        """Randomly regenerate pellets in the maze."""
+        empty_positions = [(r, c) for r in range(self.rows) for c in range(self.cols) if self.grid[r][c] == 0]
+        num_pellets = max(1, len(empty_positions) // 4)  # Regenerate 25% of empty spaces
+        random_positions = random.sample(empty_positions, num_pellets)
+        for r, c in random_positions:
+            self.grid[r][c] = 2  # Place a pellet
 
     def draw(self, screen, pacman, haduyi_list=None, show_path=False, ui_offset=50):
         """
