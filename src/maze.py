@@ -52,7 +52,7 @@ class Maze:
             show_path: Whether to visualize pacman's planned path
             ui_offset: Vertical offset for UI elements at top
         """
-        tile = 20
+        tile = 30  # Larger tiles to fill screen better
         colors = {0: (0, 0, 0), 1: (0, 0, 255), 2: (255, 255, 255)}
         
         # Fill background
@@ -67,7 +67,7 @@ class Maze:
                 # Draw pellets as small circles instead of filled squares
                 if self.grid[r][c] == 2:
                     center = (c*tile + tile//2, r*tile + tile//2 + ui_offset)
-                    pygame.draw.circle(screen, (255, 255, 255), center, 3)
+                    pygame.draw.circle(screen, (255, 255, 255), center, 5)
         
         # Draw PACMAN's planned path if requested
         if show_path and hasattr(pacman, 'current_path'):
@@ -78,25 +78,31 @@ class Maze:
                     alpha = max(50, 200 - i * 10)
                     color = (0, 255, 0, min(alpha, 200))
                     center = (c*tile + tile//2, r*tile + tile//2 + ui_offset)
-                    pygame.draw.circle(screen, color[:3], center, 4)
+                    pygame.draw.circle(screen, color[:3], center, 6)
         
         # Draw target pellet if agent has one
         if show_path and hasattr(pacman, 'target_pellet') and pacman.target_pellet:
             r, c = pacman.target_pellet
             center = (c*tile + tile//2, r*tile + tile//2 + ui_offset)
-            pygame.draw.circle(screen, (255, 0, 255), center, 6, 2)
+            pygame.draw.circle(screen, (255, 0, 255), center, 9, 2)
         
         # Draw PACMAN (yellow circle)
         pac_center = (pacman.pos[1]*tile + tile//2, pacman.pos[0]*tile + tile//2 + ui_offset)
-        pygame.draw.circle(screen, (255, 255, 0), pac_center, 8)
+        pygame.draw.circle(screen, (255, 255, 0), pac_center, 12)
         
-        # Draw Haduyi adversaries (red circles) if provided
+        # Draw Haduyi adversaries (BRIGHT RED circles) if provided
         if haduyi_list:
             for haduyi in haduyi_list:
                 if hasattr(haduyi, 'pos'):
                     r, c = haduyi.pos
                     center = (c*tile + tile//2, r*tile + tile//2 + ui_offset)
-                    pygame.draw.circle(screen, (255, 0, 0), center, 7)
+                    # Draw outer glow
+                    pygame.draw.circle(screen, (150, 0, 0), center, 15)
+                    # Draw main ghost body (bright red)
+                    pygame.draw.circle(screen, (255, 0, 0), center, 12)
+                    # Draw eyes (make it look scary!)
+                    pygame.draw.circle(screen, (255, 255, 255), (center[0]-3, center[1]-3), 3)
+                    pygame.draw.circle(screen, (255, 255, 255), (center[0]+3, center[1]-3), 3)
     
     def draw_ui(self, screen, pacman, font, game_state='playing', ui_offset=50):
         """

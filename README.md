@@ -7,10 +7,13 @@ This project implements an automated PACMAN game using Python and Pygame, where 
 
 ## Features
 
-- Automated PACMAN agent with AI pathfinding
+- Automated PACMAN agent with AI pathfinding (A*, BFS, DFS, UCS)
+- Real-time algorithm switching during gameplay
+- Intelligent ghost adversaries with chase behavior
 - Maze environment using grid representation
-- Ghosts as moving obstacles
-- Score tracking and basic game UI
+- Score tracking and game UI
+- Path visualization showing AI decision-making
+- Professional dark theme UI
 
 ---
 
@@ -64,10 +67,24 @@ pip install -r requirements.txt
 
 1. Ensure you're in the project root directory.
 2. Launch the game:
+   
+   **AI Mode (Recommended):**
    ```
-   python src/main.py
    python src/intelligent_main.py
    ```
+   
+   **Manual Control Mode:**
+   ```
+   python src/main.py
+   ```
+
+### Controls (AI Mode):
+- **1**: Switch to BFS algorithm
+- **2**: Switch to DFS algorithm
+- **3**: Switch to A* algorithm
+- **4**: Switch to UCS algorithm
+- **SPACE**: Pause/Resume game
+- **ESC**: Quit game
 
 ---
 
