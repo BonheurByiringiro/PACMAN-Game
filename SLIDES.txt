@@ -1,0 +1,86 @@
+═══════════════════════════════════════════════════════════════
+SLIDE 1: PROBLEM & SOLUTION
+═══════════════════════════════════════════════════════════════
+
+AUTOMATED PACMAN AI
+Intelligent Navigation Using Search Algorithms
+
+───────────────────────────────────────────────────────────────
+THE PROBLEM
+───────────────────────────────────────────────────────────────
+How can an autonomous agent efficiently navigate a complex 
+maze, collect targets, and avoid obstacles?
+
+───────────────────────────────────────────────────────────────
+OUR SOLUTION
+───────────────────────────────────────────────────────────────
+• Autonomous PACMAN agent
+• Collects 194 pellets in 22x20 maze
+• Avoids ghost adversaries
+• Real-time pathfinding decisions
+
+
+═══════════════════════════════════════════════════════════════
+SLIDE 2: TECHNOLOGY STACK
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+CORE TECHNOLOGIES
+───────────────────────────────────────────────────────────────
+• Python 3.12          → Programming language
+• Pygame               → 2D rendering & UI
+• Grid-based Maze      → 22x20 environment
+
+───────────────────────────────────────────────────────────────
+AI ARCHITECTURE
+───────────────────────────────────────────────────────────────
+• Intelligent Agent    → Autonomous decision-making
+• Search Algorithms    → A*, BFS, DFS, UCS
+• Pathfinding Engine   → Real-time route calculation
+• State Management     → Dynamic environment tracking
+
+───────────────────────────────────────────────────────────────
+KEY FEATURES
+───────────────────────────────────────────────────────────────
+✓ Live algorithm switching (keys 1-4)
+✓ Path visualization
+✓ Score & pellet tracking
+
+
+═══════════════════════════════════════════════════════════════
+SLIDE 3: AI ALGORITHMS
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+A* (A-STAR) - DEFAULT
+───────────────────────────────────────────────────────────────
+Strategy:    Best-first search + Manhattan distance heuristic
+Advantage:   Optimal path with minimal computation
+
+───────────────────────────────────────────────────────────────
+BFS (BREADTH-FIRST SEARCH)
+───────────────────────────────────────────────────────────────
+Strategy:    Level-by-level exploration
+Advantage:   Guaranteed shortest path
+
+───────────────────────────────────────────────────────────────
+DFS (DEPTH-FIRST SEARCH)
+───────────────────────────────────────────────────────────────
+Strategy:    Deep exploration before backtracking
+Advantage:   Memory efficient
+
+───────────────────────────────────────────────────────────────
+UCS (UNIFORM COST SEARCH)
+───────────────────────────────────────────────────────────────
+Strategy:    Expands lowest-cost nodes first
+Advantage:   Optimal for weighted paths
+
+───────────────────────────────────────────────────────────────
+HOW IT WORKS
+───────────────────────────────────────────────────────────────
+1. Identify nearest pellet
+2. Calculate optimal path using selected algorithm
+3. Navigate while avoiding ghosts
+4. Repeat until all pellets collected
+
+═══════════════════════════════════════════════════════════════

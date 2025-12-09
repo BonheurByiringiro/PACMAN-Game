@@ -275,7 +275,7 @@ class IntelligentPacmanAgent:
                 
                 # Collect pellet if present
                 if self.maze.grid[self.pos[0]][self.pos[1]] == 2:
-                    self.maze.grid[self.pos[0]][self.pos[1]] = 0
+                    self.maze.collect_pellet(self.pos[0], self.pos[1])  # This updates score!
                     self.pellets_collected += 1
                     logger.info(f"Pellet collected at {self.pos}! ({self.pellets_collected}/{self.total_pellets})")
                     

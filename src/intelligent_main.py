@@ -46,13 +46,30 @@ def initialize_game(maze, algorithm='astar', difficulty='hard', maze_file=None):
     
     # Create Haduyi adversaries at different starting positions
     haduyi_list = []
-    try:
-        # Add Haduyi at strategic positions
-        haduyi_list.append(Haduyi(maze, start_pos=(3, 3), move_delay_frames=20, difficulty=difficulty))
-        haduyi_list.append(Haduyi(maze, start_pos=(maze.rows-4, maze.cols-4), move_delay_frames=22, difficulty=difficulty))
-        # haduyi_list.append(Haduyi(maze, start_pos=(maze.rows//2, maze.cols//2), move_delay_frames=25, difficulty=difficulty))
-    except Exception as e:
-        print(f"Warning: Could not create all Haduyi: {e}")
+    
+    # Try multiple possible starting positions
+    potential_positions = [
+        (10, 10),  # Center area
+        (5, 15),   # Right side
+        (15, 5),   # Bottom left
+        (8, 8),    # Mid area
+        (12, 12),  # Mid-right
+    ]
+    
+    # Create 2 ghosts at valid positions
+    ghosts_created = 0
+    for pos in potential_positions:
+        if ghosts_created >= 2:
+            break
+        try:
+            # Check if position is valid (not a wall)
+            r, c = pos
+            if r < maze.rows and c < maze.cols and maze.grid[r][c] != 1:
+                haduyi_list.append(Haduyi(maze, start_pos=pos, move_delay_frames=20 + ghosts_created*2, difficulty=difficulty))
+                ghosts_created += 1
+                print(f"✓ Ghost {ghosts_created} created at position {pos}")
+        except Exception as e:
+            print(f"Failed to create ghost at {pos}: {e}")
     
     return pacman, haduyi_list
 
@@ -145,7 +162,7 @@ def draw_help_panel(screen, font, show_help):
 def main():
     """Main game loop with intelligent PACMAN agent."""
     pygame.init()
-    screen = pygame.display.set_mode((800, 550))
+    screen = pygame.display.set_mode((700, 750))  # Larger to fit bigger tiles
     pygame.display.set_caption("Intelligent PACMAN - Rational Agent with Search Algorithms")
     
     # Initialize fonts
@@ -286,6 +303,10 @@ def main():
         # Draw everything
         maze.draw(screen, pacman, haduyi_list, show_path=show_path, ui_offset=50)
         maze.draw_ui(screen, pacman, font, game_state=game_state, ui_offset=50)
+        
+        # Draw ghost counter
+        ghost_text = font.render(f"Ghosts: {len(haduyi_list)}", True, (255, 100, 100))
+        screen.blit(ghost_text, (520, 10))
         
         # Draw game over or won screen
         if game_state == "game_over":
