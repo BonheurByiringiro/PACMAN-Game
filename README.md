@@ -20,7 +20,7 @@ This project implements an automated PACMAN game using Python and Pygame, where 
 ## Repository Structure
 
 ```
-PACMAN-Game/
+PACMAN-Game///
 │
 ├── src/             # Source code (game logic, agents, algorithms)
 ├── assets/          # Game assets (sprites, sounds)
@@ -28,7 +28,7 @@ PACMAN-Game/
 ├── maze_layout.txt  # Maze design file
 ├── requirements.txt # Python dependencies
 ├── README.md        # Project documentation
-├── .gitignore
+├── .gitignoreS
 ```
 
 ---
